@@ -341,8 +341,8 @@ ${videoResults.map(v => `Источник: ${v.name}
       id: crypto.randomUUID(),
       number: `FBI-${new Date().getFullYear()}-${crypto.randomBytes(3).toString("hex").toUpperCase()}`,
       createdAt: new Date().toISOString(), status: "Ожидает утверждения", caseText,
-      videoNames: (req.files || []).map(f => f.originalname), analysis,
-      bbcode: makeBBCode("АНАЛИТИЧЕСКОЕ ЗАКЛЮЧЕНИЕ", analysis)
+      videoNames: [...(req.files || []).map(f => f.originalname), ...videoUrls], analysis, operatorProfile,
+      bbcode: analysis
     };
     const cases = await readJson(CASES_FILE);
     cases.unshift(record);
