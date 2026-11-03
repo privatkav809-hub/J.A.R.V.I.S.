@@ -21,7 +21,7 @@
     <section class="welcome panel">
       <div class="eyebrow">FEDERAL BUREAU · INTELLIGENCE CORE</div>
       <h1>Добро пожаловать, сэр.</h1>
-      <p id="greeting">J.A.R.V.I.S. готов к работе. Что у нас сегодня на рассмотрении?</p>
+      <p id="greeting">Система готова к работе. Выберите действие или продолжите последнее дело.</p>
       <div class="welcome-actions"><button class="primary" data-go="review">＋ Новое рассмотрение</button><button class="secondary" data-go="laws">Нормативная база</button></div>
     </section>
     <section class="stats-grid">
@@ -31,7 +31,7 @@
       <article class="stat panel"><span>В архиве</span><b id="archivedCases">0</b></article>
     </section>
     <section class="view active" id="homeView">
-      <div class="section-heading"><div><span class="eyebrow">OVERVIEW / 01</span><h2>Последние дела</h2></div><button class="text-btn" data-go="archive">Весь архив →</button></div>
+      <div class="section-heading"><div><span class="eyebrow">OVERVIEW / 01</span><h2>Последние дела</h2></div><div class="heading-actions"><button class="secondary compact" id="refreshBtn">↻ Обновить</button><button class="text-btn" data-go="archive">Весь архив →</button></div></div>
       <div id="recentCases" class="case-list"><div class="empty">Пока нет рассмотренных дел.</div></div>
     </section>
     <section class="view" id="reviewView">
@@ -52,7 +52,8 @@
       <input id="archiveSearch" class="search" placeholder="Поиск по номеру или тексту дела..."><div id="archiveList" class="case-list"></div>
     </section>
     <section class="view" id="lawsView">
-      <div class="section-heading"><div><span class="eyebrow">KNOWLEDGE DATABASE / 04</span><h2>Нормативная база</h2></div></div>
+      <div class="section-heading"><div><span class="eyebrow">KNOWLEDGE DATABASE / 04</span><h2>Нормативная база</h2></div><span class="section-count" id="lawCount">0 документов</span></div>
+      <input id="lawSearch" class="search law-search" placeholder="Поиск по названию или содержанию документа...">
       <div class="panel form-panel">
         <p class="muted">Добавляйте документы вручную, загружайте .txt или импортируйте текст с публичной страницы. Сохранённые нормы будут передаваться ИИ при рассмотрении дел.</p>
         <label for="manualLawTitle">Название документа</label>
@@ -79,14 +80,9 @@
         <div class="setting-line"><span>Модель</span><b id="modelState">—</b></div>
         <div class="setting-line"><span>Обработка видео</span><b>FFmpeg на сервере</b></div>
         <p class="muted tiny">API-ключ хранится только на сервере в Environment Render. Не вставляйте его в приложение и не отправляйте третьим лицам.</p>
-        <hr><h3>Голосовой интерфейс</h3>
-        <div class="setting-line"><span>Приветствие при входе</span><label class="switch"><input id="voiceGreetingEnabled" type="checkbox" checked><span class="switch-track"></span></label></div>
-        <p class="muted tiny">При открытии приложения J.A.R.V.I.S. поприветствует вас синтезированным голосом устройства. Доступность и тембр зависят от установленных голосов Android.</p>
-        <div class="voice-actions"><button id="testGreetingBtn" class="secondary">▶ Прослушать приветствие</button><button id="stopVoiceBtn" class="text-btn">Остановить</button></div>
-        <div id="voiceStatus" class="muted tiny" aria-live="polite">Голосовой модуль готов.</div>
         <hr><h3>О программе</h3>
         <p><b>J.A.R.V.I.S. / FBI CASE ANALYST</b><br>Интеллектуальная система игрового делопроизводства Arizona RolePlay.</p>
-        <p class="muted">Разработчик: Крест Дэтрэйн (Krest Detrain)<br>Версия: 1.2 · Knowledge Base Update</p>
+        <p class="muted">Разработчик: Крест Дэтрэйн (Krest Detrain)<br>Версия: 2.0 · Interface Refresh</p>
       </div>
     </section>
   </main>
