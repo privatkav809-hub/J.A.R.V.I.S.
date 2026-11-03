@@ -6,6 +6,9 @@ on:
     paths:
       - 'capacitor.config.json'
       - 'www/**'
+      - 'public/**'
+      - 'server.js'
+      - 'package.json'
       - '.github/workflows/build-apk.yml'
 
 jobs:
