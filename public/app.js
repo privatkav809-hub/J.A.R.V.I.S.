@@ -8,7 +8,7 @@ function applyProfile() {
   $("profileRole").value = operatorProfile.role || "";
   $("operatorName").textContent = operatorProfile.nick || "ГОСТЬ";
   $("operatorRole").textContent = operatorProfile.role || "ПРОФИЛЬ НЕ ЗАПОЛНЕН";
-  $("operatorAvatar").textContent = operatorProfile.nick ? operatorProfile.nick.split(/\\s+/).slice(0,2).map(x=>x[0]).join("").toUpperCase() : "—";
+  $("operatorAvatar").textContent = operatorProfile.nick ? operatorProfile.nick.split(/\s+/).slice(0,2).map(x=>x[0]).join("").toUpperCase() : "—";
 }
 $("saveProfileBtn").addEventListener("click", () => {
   operatorProfile = {nick:$("profileNick").value.trim(),role:$("profileRole").value.trim()};
