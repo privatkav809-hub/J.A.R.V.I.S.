@@ -101,3 +101,14 @@ a{color:var(--gold2)}
 }
 @media(max-width:380px){main{padding:12px 10px 24px}.welcome h1{font-size:24px}.welcome{padding:20px 16px}.stats-grid{gap:7px}.stat{padding:12px}.stat b{font-size:22px}.nav-item{font-size:8px}}
 @media(min-width:761px) and (max-width:980px){main{padding-left:255px;padding-right:20px}.bottom-nav{left:12px;width:205px}.operator-copy{display:none}}
+
+/* Voice controls */
+.switch{position:relative;display:inline-flex;align-items:center;cursor:pointer}
+.switch input{position:absolute;opacity:0;width:1px;height:1px}
+.switch-track{width:42px;height:24px;border-radius:20px;background:#344258;border:1px solid #506078;transition:.2s;position:relative}
+.switch-track:after{content:"";position:absolute;width:18px;height:18px;left:2px;top:2px;border-radius:50%;background:#d8deea;transition:.2s}
+.switch input:checked+.switch-track{background:#8e713b;border-color:#c6a45c}
+.switch input:checked+.switch-track:after{transform:translateX(18px);background:#fff3d0}
+.switch input:focus-visible+.switch-track{outline:2px solid var(--gold2);outline-offset:3px}
+.voice-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:12px 0 8px}
+#voiceStatus{min-height:18px}
