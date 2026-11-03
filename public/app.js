@@ -269,7 +269,9 @@ $("analyzeBtn").addEventListener("click", async () => {
   btn.textContent = "J.A.R.V.I.S. анализирует материалы...";
   $("analysisResult").classList.add("hidden");
   const form = new FormData();
-  form.append("caseText", text);\n  form.append("videoUrls", $("videoUrls").value);\n  form.append("operatorProfile", JSON.stringify(operatorProfile));
+  form.append("caseText", text);
+  form.append("videoUrls", $("videoUrls").value);
+  form.append("operatorProfile", JSON.stringify(operatorProfile));
   [...$("videoFiles").files].forEach(f => form.append("videos", f));
   try {
     const record = await api("/api/analyze", { method: "POST", body: form });
