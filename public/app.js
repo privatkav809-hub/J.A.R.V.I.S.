@@ -2,7 +2,9 @@ const $ = (id) => document.getElementById(id);
 let cases = [], laws = [], currentRecord = null;
 const views = ["home","review","archive","laws","settings"];
 const PROFILE_KEY = "jarvis-operator-profile";
-let operatorProfile = JSON.parse(localStorage.getItem(PROFILE_KEY) || "{}");
+let operatorProfile = {};
+try { operatorProfile = JSON.parse(localStorage.getItem(PROFILE_KEY) || "{}") || {}; }
+catch { localStorage.removeItem(PROFILE_KEY); operatorProfile = {}; }
 function applyProfile() {
   $("profileNick").value = operatorProfile.nick || "";
   $("profileRole").value = operatorProfile.role || "";
@@ -11,8 +13,13 @@ function applyProfile() {
   $("operatorAvatar").textContent = operatorProfile.nick ? operatorProfile.nick.split(/\s+/).slice(0,2).map(x=>x[0]).join("").toUpperCase() : "—";
 }
 $("saveProfileBtn").addEventListener("click", () => {
-  operatorProfile = {nick:$("profileNick").value.trim(),role:$("profileRole").value.trim()};
-  localStorage.setItem(PROFILE_KEY,JSON.stringify(operatorProfile)); applyProfile(); toast("Профиль сохранён.");
+  const nick = $("profileNick").value.trim();
+  const role = $("profileRole").value.trim();
+  if (!nick || !role) return toast("Для регистрации укажите игровой Nick Name и должность.");
+  operatorProfile = { nick, role };
+  localStorage.setItem(PROFILE_KEY, JSON.stringify(operatorProfile));
+  applyProfile();
+  toast("Регистрация сотрудника сохранена.");
 });
 $("clearProfileBtn").addEventListener("click", () => {
   operatorProfile={}; localStorage.removeItem(PROFILE_KEY); applyProfile(); toast("Профиль очищен. Регистрация необязательна.");
@@ -262,6 +269,11 @@ $("importLawBtn").addEventListener("click", async () => {
 });
 
 $("analyzeBtn").addEventListener("click", async () => {
+  if (!operatorProfile.nick || !operatorProfile.role) {
+    toast("Сначала зарегистрируйте сотрудника: укажите Nick Name и должность.");
+    navigate("settings");
+    return;
+  }
   const text = $("caseText").value.trim();
   if (text.length < 30) return toast("Сначала вставьте текст CASEFILE.");
   const btn = $("analyzeBtn");
