@@ -3,10 +3,10 @@
   "appName": "J.A.R.V.I.S.",
   "webDir": "www",
   "server": {
-    "url": "https://j-a-r-v-i-s-2-eiqg.onrender.com",
+    "url": "https://j-a-r-v-i-s-kghm.onrender.com",
     "cleartext": false,
     "allowNavigation": [
-      "j-a-r-v-i-s-2-eiqg.onrender.com"
+      "j-a-r-v-i-s-kghm.onrender.com"
     ]
   },
   "android": {
