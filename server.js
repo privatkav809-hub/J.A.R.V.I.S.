@@ -346,21 +346,27 @@ ${videoResults.map(v => `Источник: ${v.name}
     const bbcodeMatch = analysis.match(/\[\[BBCODE_START\]\]([\s\S]*?)\[\[BBCODE_END\]\]/i);
     let bbcode = bbcodeMatch ? bbcodeMatch[1].trim() : "";
     if (!bbcode) {
-      const docPart = analysis.split(/проект документа(?: в bbcode)?\s*:?/i).pop()?.trim() || "";
-      const body = docPart.length > 80 ? docPart : analysis;
-      const title = /повестк/i.test(body) ? "ПОВЕСТКА" :
-        /рапорт/i.test(body) ? "РАПОРТ" :
-        /дисциплинарн/i.test(body) ? "ПОСТАНОВЛЕНИЕ — О НАЗНАЧЕНИИ ДИСЦИПЛИНАРНОГО НАКАЗАНИЯ" :
-        /закрыти.{0,20}дела|передач.{0,20}архив/i.test(body) ? "ПОСТАНОВЛЕНИЕ — О ЗАКРЫТИИ ДЕЛА И ПЕРЕДАЧЕ В АРХИВ" :
-        "ПОСТАНОВЛЕНИЕ — О ВЫДАЧЕ ОРДЕРА НА АРЕСТ";
-      bbcode = makeBBCode(title, body, operatorProfile);
-    } else {
-      const signature = [operatorProfile.role, operatorProfile.nick].filter(Boolean).join(" ");
-      if (signature) {
-        bbcode = bbcode.replace(/(?:должность|nick\s*name|сотрудник)\s*:?\s*(?:\[указать\]|не указан|указать)?/ig, signature);
-        if (operatorProfile.nick && !bbcode.includes(operatorProfile.nick)) bbcode += `\n[RIGHT]${bbEscape(operatorProfile.role)}\n${bbEscape(operatorProfile.nick)}\nПодпись: ${bbEscape(operatorProfile.nick)}[/RIGHT]`;
+      const draft = await askJarvis([{
+        type: "text",
+        text: `Составь только готовый форумный документ Arizona RolePlay на основе анализа ниже. Верни только BBCode между [[BBCODE_START]] и [[BBCODE_END]], без пояснений. Обязательно: [FONT=times new roman], шапка справа с Федеральным Бюро Расследований, Центральный офис г. Сан-Фиерро, Квинс 11 и датой; логотип по центру [IMG width="200px"]https://i.imgur.com/zSL9jts.png[/IMG]; серый текст rgb(204,204,204), заголовки rgb(163,143,132); заключительная подпись справа. Ник сотрудника: ${operatorProfile.nick}. Должность: ${operatorProfile.role}. Не оставляй placeholders для этих двух полей. Не добавляй факты и статьи, которых нет в анализе. Если факт неизвестен, укажи «Не установлено». Используй соответствующий вид документа: постановление, повестка или рапорт.\n\nАНАЛИЗ:\n${analysis}`
+      }]);
+      const draftMatch = draft.match(/\[\[BBCODE_START\]\]([\s\S]*?)\[\[BBCODE_END\]\]/i);
+      if (draftMatch) bbcode = draftMatch[1].trim();
+      else {
+        const docPart = analysis.split(/проект документа(?: в bbcode)?\s*:?/i).pop()?.trim() || "";
+        const body = docPart.length > 80 ? docPart : "Проект документа требует ручного уточнения по материалам дела.\n\n" + analysis.slice(-3500);
+        const title = /повестк/i.test(body) ? "ПОВЕСТКА" :
+          /рапорт/i.test(body) ? "РАПОРТ" :
+          /дисциплинарн/i.test(body) ? "ПОСТАНОВЛЕНИЕ — О НАЗНАЧЕНИИ ДИСЦИПЛИНАРНОГО НАКАЗАНИЯ" :
+          /закрыти.{0,20}дела|передач.{0,20}архив/i.test(body) ? "ПОСТАНОВЛЕНИЕ — О ЗАКРЫТИИ ДЕЛА И ПЕРЕДАЧЕ В АРХИВ" :
+          "ПОСТАНОВЛЕНИЕ";
+        bbcode = makeBBCode(title, body, operatorProfile);
       }
     }
+    const signatureFooter = `[RIGHT][COLOR=rgb(163,143,132)]${bbEscape(operatorProfile.role)}\n${bbEscape(operatorProfile.nick)}\nПодпись: ${bbEscape(operatorProfile.nick)}[/COLOR][/RIGHT]`;
+    bbcode = bbcode.replace(/\[RIGHT\][\s\S]*?\[\/RIGHT\](?=\s*(?:\[\/FONT\])?\s*$)/i, "");
+    bbcode = bbcode.replace(/\[\/FONT\]\s*$/i, `${signatureFooter}[/FONT]`);
+    if (!/\[\/FONT\]\s*$/i.test(bbcode)) bbcode += `\n${signatureFooter}`;
     const record = {
       id: crypto.randomUUID(),
       number: `FBI-${new Date().getFullYear()}-${crypto.randomBytes(3).toString("hex").toUpperCase()}`,
