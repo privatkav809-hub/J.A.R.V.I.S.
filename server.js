@@ -8,6 +8,7 @@ import os from "node:os";
 import crypto from "node:crypto";
 import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import ffmpegPath from "ffmpeg-static";
 
 dotenv.config();
 
@@ -186,7 +187,7 @@ async function processVideo(buffer) {
   await fs.writeFile(input, buffer);
   await fs.mkdir(framesDir);
   try {
-    await run("ffmpeg", ["-i", input, "-vf", "fps=1/10,scale=960:-1", "-frames:v", "8", path.join(framesDir, "frame-%02d.jpg"), "-y"]);
+    await run(ffmpegPath || "ffmpeg", ["-i", input, "-vf", "fps=1/10,scale=960:-1", "-frames:v", "8", path.join(framesDir, "frame-%02d.jpg"), "-y"]);
     const names = (await fs.readdir(framesDir)).sort();
     const frames = [];
     for (let i = 0; i < names.length; i++) {
