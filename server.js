@@ -104,17 +104,22 @@ function bbEscape(value = "") {
   return String(value).replace(/\[/g, "&#91;").replace(/\]/g, "&#93;");
 }
 
-function makeBBCode(title, body) {
-  return `[center][b][size=16]ФЕДЕРАЛЬНОЕ БЮРО РАССЛЕДОВАНИЙ[/size][/b]
-Центральный офис г. Сан-Фиерро, Квинс 11[/center]
-[hr]
-[center][b][size=14]${bbEscape(title || "АНАЛИТИЧЕСКОЕ ЗАКЛЮЧЕНИЕ")}[/size][/b][/center]
-
-${body || "Требуется заполнить содержание документа."}
-
-[hr]
-[right]Уполномоченный сотрудник: [указать]
-Подпись: [указать][/right]`;
+function makeBBCode(title, body, profile = {}) {
+  const date = new Date().toLocaleDateString("ru-RU", { timeZone: "Europe/Kyiv" });
+  const role = bbEscape(profile.role || "Должность не указана");
+  const nick = bbEscape(profile.nick || "Nick Name не указан");
+  const safeBody = String(body || "Недостаточно данных для заполнения документа.")
+    .replace(/\*\*(.*?)\*\*/g, "[b]$1[/b]")
+    .replace(/^#{1,6}\s*/gm, "");
+  return `[FONT=times new roman][RIGHT][COLOR=rgb(163,143,132)]Федеральное Бюро Расследований
+Центральный офис г. Сан-Фиерро, Квинс 11
+${date}[/COLOR][/RIGHT]
+[CENTER][IMG width="200px"]https://i.imgur.com/zSL9jts.png[/IMG][/CENTER]
+[CENTER][B][COLOR=rgb(163,143,132)]${bbEscape(title || "ПОСТАНОВЛЕНИЕ")}[/COLOR][/B][/CENTER]
+[COLOR=rgb(204,204,204)]${safeBody}[/COLOR]
+[RIGHT][COLOR=rgb(163,143,132)]${role}
+${nick}
+Подпись: ${nick}[/COLOR][/RIGHT][/FONT]`;
 }
 
 function extractText(html) {
@@ -282,7 +287,7 @@ ${l.content}`).join("\n\n---\n\n").slice(0, 90000);
 
   const videoResults = [];
   const cleanups = [];
-  const videoUrls = String(req.body.videoUrls || "").split(/\\r?\\n/).map(x => x.trim()).filter(Boolean).slice(0, 5);
+  const videoUrls = String(req.body.videoUrls || "").split(/\r?\n/).map(x => x.trim()).filter(Boolean).slice(0, 5);
   const operatorProfile = (() => {
     try {
       const p = JSON.parse(req.body.operatorProfile || "{}");
@@ -326,7 +331,7 @@ ${cleanLaws || "Нормативные документы не добавлен�
 ${videoResults.map(v => `Источник: ${v.name}
 Распознанная речь: Не получена.
 Проанализировано выборочных кадров: ${v.frames.length}.
-Временные отметки: ${v.frames.map(f => f.timestamp).join(", ")}`).join("\\n\\n") || "Видео не приложено."}
+Временные отметки: ${v.frames.map(f => f.timestamp).join(", ")}`).join("\n\n") || "Видео не приложено."}
 `
     }];
 
@@ -339,7 +344,23 @@ ${videoResults.map(v => `Источник: ${v.name}
 
     const analysis = await askJarvis(content);
     const bbcodeMatch = analysis.match(/\[\[BBCODE_START\]\]([\s\S]*?)\[\[BBCODE_END\]\]/i);
-    const bbcode = bbcodeMatch ? bbcodeMatch[1].trim() : analysis;
+    let bbcode = bbcodeMatch ? bbcodeMatch[1].trim() : "";
+    if (!bbcode) {
+      const docPart = analysis.split(/проект документа(?: в bbcode)?\s*:?/i).pop()?.trim() || "";
+      const body = docPart.length > 80 ? docPart : analysis;
+      const title = /повестк/i.test(body) ? "ПОВЕСТКА" :
+        /рапорт/i.test(body) ? "РАПОРТ" :
+        /дисциплинарн/i.test(body) ? "ПОСТАНОВЛЕНИЕ — О НАЗНАЧЕНИИ ДИСЦИПЛИНАРНОГО НАКАЗАНИЯ" :
+        /закрыти.{0,20}дела|передач.{0,20}архив/i.test(body) ? "ПОСТАНОВЛЕНИЕ — О ЗАКРЫТИИ ДЕЛА И ПЕРЕДАЧЕ В АРХИВ" :
+        "ПОСТАНОВЛЕНИЕ — О ВЫДАЧЕ ОРДЕРА НА АРЕСТ";
+      bbcode = makeBBCode(title, body, operatorProfile);
+    } else {
+      const signature = [operatorProfile.role, operatorProfile.nick].filter(Boolean).join(" ");
+      if (signature) {
+        bbcode = bbcode.replace(/(?:должность|nick\s*name|сотрудник)\s*:?\s*(?:\[указать\]|не указан|указать)?/ig, signature);
+        if (operatorProfile.nick && !bbcode.includes(operatorProfile.nick)) bbcode += `\n[RIGHT]${bbEscape(operatorProfile.role)}\n${bbEscape(operatorProfile.nick)}\nПодпись: ${bbEscape(operatorProfile.nick)}[/RIGHT]`;
+      }
+    }
     const record = {
       id: crypto.randomUUID(),
       number: `FBI-${new Date().getFullYear()}-${crypto.randomBytes(3).toString("hex").toUpperCase()}`,
