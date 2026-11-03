@@ -1,6 +1,23 @@
 const $ = (id) => document.getElementById(id);
 let cases = [], laws = [], currentRecord = null;
 const views = ["home","review","archive","laws","settings"];
+const PROFILE_KEY = "jarvis-operator-profile";
+let operatorProfile = JSON.parse(localStorage.getItem(PROFILE_KEY) || "{}");
+function applyProfile() {
+  $("profileNick").value = operatorProfile.nick || "";
+  $("profileRole").value = operatorProfile.role || "";
+  $("operatorName").textContent = operatorProfile.nick || "ГОСТЬ";
+  $("operatorRole").textContent = operatorProfile.role || "ПРОФИЛЬ НЕ ЗАПОЛНЕН";
+  $("operatorAvatar").textContent = operatorProfile.nick ? operatorProfile.nick.split(/\\s+/).slice(0,2).map(x=>x[0]).join("").toUpperCase() : "—";
+}
+$("saveProfileBtn").addEventListener("click", () => {
+  operatorProfile = {nick:$("profileNick").value.trim(),role:$("profileRole").value.trim()};
+  localStorage.setItem(PROFILE_KEY,JSON.stringify(operatorProfile)); applyProfile(); toast("Профиль сохранён.");
+});
+$("clearProfileBtn").addEventListener("click", () => {
+  operatorProfile={}; localStorage.removeItem(PROFILE_KEY); applyProfile(); toast("Профиль очищен. Регистрация необязательна.");
+});
+applyProfile();
 
 function toast(message) {
   const el = $("toast");
@@ -252,7 +269,7 @@ $("analyzeBtn").addEventListener("click", async () => {
   btn.textContent = "J.A.R.V.I.S. анализирует материалы...";
   $("analysisResult").classList.add("hidden");
   const form = new FormData();
-  form.append("caseText", text);
+  form.append("caseText", text);\n  form.append("videoUrls", $("videoUrls").value);\n  form.append("operatorProfile", JSON.stringify(operatorProfile));
   [...$("videoFiles").files].forEach(f => form.append("videos", f));
   try {
     const record = await api("/api/analyze", { method: "POST", body: form });
