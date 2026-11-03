@@ -155,6 +155,27 @@ async function run(command, args) {
   });
 }
 
+async function downloadVideoUrl(rawUrl) {
+  const parsed = new URL(rawUrl);
+  if (!["http:","https:"].includes(parsed.protocol)) throw new Error("Разрешены только HTTP/HTTPS ссылки.");
+  const host=parsed.hostname.toLowerCase();
+  if (["localhost","127.0.0.1","::1"].includes(host)||host.endsWith(".local")) throw new Error("Локальные адреса запрещены.");
+  const dir=await fs.mkdtemp(path.join(os.tmpdir(),"jarvis-url-"));
+  const output=path.join(dir,"source.%(ext)s");
+  try {
+    await new Promise((resolve,reject)=>{
+      const p=spawn("yt-dlp",["--no-playlist","--max-filesize","150M","-f","best[height<=720]/best","-o",output,rawUrl]);
+      let err=""; p.stderr.on("data",d=>err+=d.toString()); p.on("error",reject);
+      p.on("close",code=>code===0?resolve():reject(new Error(err.slice(-1200)||"yt-dlp не смог получить видео.")));
+      const timer=setTimeout(()=>{p.kill("SIGKILL");reject(new Error("Превышено время получения видео."));},90000); timer.unref();
+    });
+    const files=await fs.readdir(dir); const name=files.find(x=>x!=="source.info.json");
+    if(!name) throw new Error("Видеофайл не получен.");
+    const fp=path.join(dir,name); const stat=await fs.stat(fp);
+    if(stat.size>150*1024*1024) throw new Error("Видео превышает лимит 150 МБ.");
+    return {buffer:await fs.readFile(fp),cleanup:()=>fs.rm(dir,{recursive:true,force:true})};
+  } catch(e) { await fs.rm(dir,{recursive:true,force:true}); throw new Error("Не удалось получить видео по ссылке: "+e.message); }
+}
 async function processVideo(buffer) {
   const dir = await fs.mkdtemp(path.join(os.tmpdir(), "jarvis-"));
   const input = path.join(dir, "input.mp4");
@@ -269,7 +290,7 @@ ${l.content}`).join("\n\n---\n\n").slice(0, 90000);
       type: "text",
       text: `
 Ты — J.A.R.V.I.S., аналитическое ядро FBI CASE ANALYST для игрового RP-проекта Arizona RolePlay.
-Отвечай исключительно на русском языке.
+Отвечай исключительно на русском языке.\nСоставитель: должность «${operatorProfile.role || "Не указана"}», игровой Nick Name «${operatorProfile.nick || "Не указан"}». Если профиль указан, подставляй эти данные в строки «Я, Должность Nick Name» и подпись.\nИТОГОВЫЙ ПРОЕКТ ДОКУМЕНТА ОБЯЗАТЕЛЬНО ВЫДАВАЙ СТРОГО В BBCode по образцам пользователя: [RIGHT], [CENTER], [FONT=times new roman], [COLOR=rgb(...)], [B], логотип [IMG width="200px"]https://i.imgur.com/zSL9jts.png[/IMG], шапка ФБР и подпись справа. Не используй Markdown, HTML или обычное оформление вместо BBCode. Выбери подходящий вид: постановление об ордере, повестка, дисциплинарное постановление, рапорт об аресте либо постановление о закрытии дела. Не выдумывай нормы и факты; неизвестное помечай как «Не установлено».
 Это игровое делопроизводство, не реальная юридическая консультация.
 Работай независимо: не поддерживай автоматически заявителя или сотрудника.
 Не выдумывай факты, статьи, даты, имена, содержание видео или полномочия.
@@ -310,7 +331,7 @@ ${videoResults.map(v => `Файл: ${v.name}
       }
     }
 
-    const analysis = await askJarvis(content);
+    for(const url of videoUrls){const dl=await downloadVideoUrl(url);cleanups.push(dl.cleanup);const vr=await processVideo(dl.buffer);cleanups.push(vr.cleanup);videoResults.push({name:url,transcript:"",frames:vr.frames});}\n    const analysis = await askJarvis(content);
     const record = {
       id: crypto.randomUUID(),
       number: `FBI-${new Date().getFullYear()}-${crypto.randomBytes(3).toString("hex").toUpperCase()}`,
