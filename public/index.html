@@ -22,7 +22,7 @@
       <div class="eyebrow">FEDERAL BUREAU · INTELLIGENCE CORE</div>
       <h1>Добро пожаловать, сэр.</h1>
       <p id="greeting">Система готова к работе. Выберите действие или продолжите последнее дело.</p>
-      <div class="welcome-actions"><button class="primary" data-go="review">＋ Новое рассмотрение</button><button class="secondary" data-go="laws">Нормативная база</button></div>
+      <div class="welcome-actions"><button class="primary" data-go="review">＋ Новое рассмотрение</button><button class="secondary" data-go="laws">Нормативная база</button><button class="secondary" data-go="settings">Регистрация сотрудника</button></div>
     </section>
     <section class="stats-grid">
       <article class="stat panel"><span>Всего дел</span><b id="totalCases">0</b></article>
@@ -75,7 +75,7 @@
     </section>
     <section class="view" id="settingsView">
       <div class="section-heading"><div><span class="eyebrow">SYSTEM / 05</span><h2>Состояние системы</h2></div></div>
-      <div class="panel settings-card"><h3>Профиль сотрудника <span class="muted">(необязательно)</span></h3><p class="muted tiny">Никнейм и должность будут автоматически добавляться в проекты документов. Пароль не нужен; профиль хранится в этом браузере.</p><label for="profileNick">Игровой Nick Name</label><input id="profileNick" class="search" maxlength="60" placeholder="Например: Krest Detrain"><label for="profileRole">Должность</label><input id="profileRole" class="search" maxlength="100" placeholder="Например: Заместитель директора ФБР"><div class="welcome-actions"><button class="primary" id="saveProfileBtn">Сохранить профиль</button><button class="secondary" id="clearProfileBtn">Пропустить / очистить</button></div><hr>
+      <div class="panel settings-card"><h3>Регистрация сотрудника / профиль</h3><p class="muted tiny">Укажи игровой Nick Name и должность. Эти данные будут автоматически добавляться в документы и подпись. Это локальный профиль на этом устройстве, без пароля и отдельного аккаунта.</p><label for="profileNick">Игровой Nick Name</label><input id="profileNick" class="search" maxlength="60" placeholder="Например: Krest Detrain"><label for="profileRole">Должность</label><input id="profileRole" class="search" maxlength="100" placeholder="Например: Заместитель директора ФБР"><div class="welcome-actions"><button class="primary" id="saveProfileBtn">Сохранить профиль</button><button class="secondary" id="clearProfileBtn">Пропустить / очистить</button></div><hr>
         <div class="setting-line"><span>Интеллектуальное ядро</span><b id="aiState">Проверка...</b></div>
         <div class="setting-line"><span>Модель</span><b id="modelState">—</b></div>
         <div class="setting-line"><span>Обработка видео</span><b>FFmpeg на сервере</b></div>
