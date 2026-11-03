@@ -21,6 +21,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Check JavaScript syntax
+        run: node --check public/app.js && node --check server.js
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
