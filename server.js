@@ -338,7 +338,7 @@ ${videoResults.map(v => `Источник: ${v.name}
     }
 
     const analysis = await askJarvis(content);
-    const bbcodeMatch = analysis.match(/\\[\\[BBCODE_START\\]\\]([\\s\\S]*?)\\[\\[BBCODE_END\\]\\]/i);
+    const bbcodeMatch = analysis.match(/\[\[BBCODE_START\]\]([\s\S]*?)\[\[BBCODE_END\]\]/i);
     const bbcode = bbcodeMatch ? bbcodeMatch[1].trim() : analysis;
     const record = {
       id: crypto.randomUUID(),
