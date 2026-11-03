@@ -135,11 +135,18 @@ $("archiveSearch").addEventListener("input", renderArchive);
 
 function renderLaws() {
   $("lawList").innerHTML = "";
+  const q = ($("lawSearch")?.value || "").trim().toLowerCase();
+  if ($("lawCount")) $("lawCount").textContent = `${laws.length} ${laws.length === 1 ? "документ" : "документов"}`;
   if (!laws.length) {
     $("lawList").innerHTML = '<div class="empty">Нормативные документы ещё не добавлены.</div>';
     return;
   }
-  laws.forEach(l => {
+  const filteredLaws = laws.filter(l => (l.title + " " + l.content).toLowerCase().includes(q));
+  if (!filteredLaws.length) {
+    $("lawList").innerHTML = '<div class="empty">По вашему запросу документы не найдены.</div>';
+    return;
+  }
+  filteredLaws.forEach(l => {
     const el = document.createElement("div");
     el.className = "law-item";
     const title = document.createElement("b");
@@ -180,6 +187,9 @@ function renderLaws() {
     $("lawList").append(el);
   });
 }
+
+$("lawSearch")?.addEventListener("input", renderLaws);
+$("refreshBtn")?.addEventListener("click", async () => { const b = $("refreshBtn"); b.disabled = true; b.textContent = "Обновляю…"; await refresh(); b.disabled = false; b.textContent = "↻ Обновить"; });
 
 $("saveManualLawBtn").addEventListener("click", async () => {
   const title = $("manualLawTitle").value.trim();
@@ -306,68 +316,5 @@ function showRecord(r) {
   $("archiveList").after($("analysisResult"));
 }
 
-
-const JARVIS_GREETING = "Приветствую вас, сэр. Система J.A.R.V.I.S. готова к работе. Ожидаю ваших указаний.";
-let greetingSpokenThisLoad = false;
-
-function getRussianVoice() {
-  if (!("speechSynthesis" in window)) return null;
-  const voices = window.speechSynthesis.getVoices();
-  return voices.find(v => /^ru(-|$)/i.test(v.lang) && /male|pavel|dmitry|андрей|павел|дмитрий/i.test(v.name))
-    || voices.find(v => /^ru(-|$)/i.test(v.lang))
-    || null;
-}
-
-function speakJarvis(text = JARVIS_GREETING) {
-  if (!("speechSynthesis" in window) || !("SpeechSynthesisUtterance" in window)) {
-    if ($("voiceStatus")) $("voiceStatus").textContent = "На этом устройстве нет поддержки синтеза речи.";
-    return false;
-  }
-  window.speechSynthesis.cancel();
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = "ru-RU";
-  utterance.rate = 0.88;
-  utterance.pitch = 0.78;
-  const voice = getRussianVoice();
-  if (voice) utterance.voice = voice;
-  utterance.onstart = () => { if ($("voiceStatus")) $("voiceStatus").textContent = "J.A.R.V.I.S. говорит…"; };
-  utterance.onend = () => { if ($("voiceStatus")) $("voiceStatus").textContent = "Голосовой модуль готов."; };
-  utterance.onerror = () => { if ($("voiceStatus")) $("voiceStatus").textContent = "Не удалось запустить голос. Проверьте синтез речи в настройках Android."; };
-  window.speechSynthesis.speak(utterance);
-  return true;
-}
-
-function initVoiceGreeting() {
-  const enabled = localStorage.getItem("jarvis-voice-greeting") !== "false";
-  const toggle = $("voiceGreetingEnabled");
-  if (toggle) {
-    toggle.checked = enabled;
-    toggle.addEventListener("change", () => {
-      localStorage.setItem("jarvis-voice-greeting", String(toggle.checked));
-      if (!toggle.checked && "speechSynthesis" in window) window.speechSynthesis.cancel();
-      if ($("voiceStatus")) $("voiceStatus").textContent = toggle.checked ? "Приветствие при входе включено." : "Приветствие при входе отключено.";
-    });
-  }
-  $("testGreetingBtn")?.addEventListener("click", () => speakJarvis());
-  $("stopVoiceBtn")?.addEventListener("click", () => {
-    if ("speechSynthesis" in window) window.speechSynthesis.cancel();
-    if ($("voiceStatus")) $("voiceStatus").textContent = "Воспроизведение остановлено.";
-  });
-  if (!enabled) return;
-  const launchGreeting = () => {
-    if (greetingSpokenThisLoad || localStorage.getItem("jarvis-voice-greeting") === "false") return;
-    greetingSpokenThisLoad = true;
-    speakJarvis();
-  };
-  if ("speechSynthesis" in window) window.speechSynthesis.getVoices();
-  setTimeout(launchGreeting, 850);
-  const retryOnce = () => {
-    if (!greetingSpokenThisLoad) launchGreeting();
-  };
-  window.addEventListener("pointerdown", retryOnce, { once: true });
-  window.addEventListener("keydown", retryOnce, { once: true });
-}
-
-initVoiceGreeting();
 
 refresh();
