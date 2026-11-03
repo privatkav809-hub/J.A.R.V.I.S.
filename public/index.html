@@ -79,6 +79,11 @@
         <div class="setting-line"><span>Модель</span><b id="modelState">—</b></div>
         <div class="setting-line"><span>Обработка видео</span><b>FFmpeg на сервере</b></div>
         <p class="muted tiny">API-ключ хранится только на сервере в Environment Render. Не вставляйте его в приложение и не отправляйте третьим лицам.</p>
+        <hr><h3>Голосовой интерфейс</h3>
+        <div class="setting-line"><span>Приветствие при входе</span><label class="switch"><input id="voiceGreetingEnabled" type="checkbox" checked><span class="switch-track"></span></label></div>
+        <p class="muted tiny">При открытии приложения J.A.R.V.I.S. поприветствует вас синтезированным голосом устройства. Доступность и тембр зависят от установленных голосов Android.</p>
+        <div class="voice-actions"><button id="testGreetingBtn" class="secondary">▶ Прослушать приветствие</button><button id="stopVoiceBtn" class="text-btn">Остановить</button></div>
+        <div id="voiceStatus" class="muted tiny" aria-live="polite">Голосовой модуль готов.</div>
         <hr><h3>О программе</h3>
         <p><b>J.A.R.V.I.S. / FBI CASE ANALYST</b><br>Интеллектуальная система игрового делопроизводства Arizona RolePlay.</p>
         <p class="muted">Разработчик: Крест Дэтрэйн (Krest Detrain)<br>Версия: 1.2 · Knowledge Base Update</p>
