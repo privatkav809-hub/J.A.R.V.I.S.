@@ -74,7 +74,7 @@ async function askJarvis(content) {
     headers: {
       "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
       "Content-Type": "application/json",
-      "HTTP-Referer": process.env.APP_URL || "https://j-a-r-v-i-s-kghm.onrender.com",
+      "HTTP-Referer": process.env.APP_URL || "https://j-a-r-v-i-s-2-eiqg.onrender.com",
       "X-Title": "J.A.R.V.I.S. FBI CASE ANALYST"
     },
     body: JSON.stringify({
