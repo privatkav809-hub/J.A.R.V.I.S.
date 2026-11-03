@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#080d18">
+  <meta name="description" content="J.A.R.V.I.S. — FBI CASE ANALYST для Arizona RolePlay">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="stylesheet" href="/style.css">
+  <title>J.A.R.V.I.S. | FBI CASE ANALYST</title>
+</head>
+<body>
+<div class="app-shell">
+  <header class="topbar">
+    <div class="brand-mark">J<span>.</span></div>
+    <div class="brand-copy"><b>J.A.R.V.I.S.</b><small>FBI CASE ANALYST</small></div>
+    <div class="status"><i id="statusDot"></i><span id="statusText">Проверка ИИ</span></div>
+  </header>
+
+  <main>
+    <section class="welcome panel">
+      <div class="eyebrow">FEDERAL BUREAU · INTELLIGENCE CORE</div>
+      <h1>Добро пожаловать, сэр.</h1>
+      <p id="greeting">J.A.R.V.I.S. готов к работе. Что у нас сегодня на рассмотрении?</p>
+      <div class="welcome-actions">
+        <button class="primary" data-go="review">＋ Новое рассмотрение</button>
+        <button class="secondary" data-go="laws">Нормативная база</button>
+      </div>
+    </section>
+
+    <section class="stats-grid">
+      <article class="stat panel"><span>Всего дел</span><b id="totalCases">0</b></article>
+      <article class="stat panel"><span>Ожидают решения</span><b id="pendingCases">0</b></article>
+      <article class="stat panel"><span>Утверждено</span><b id="approvedCases">0</b></article>
+      <article class="stat panel"><span>В архиве</span><b id="archivedCases">0</b></article>
+    </section>
+
+    <section class="view active" id="homeView">
+      <div class="section-heading"><div><span class="eyebrow">OVERVIEW</span><h2>Последние дела</h2></div><button class="text-btn" data-go="archive">Весь архив →</button></div>
+      <div id="recentCases" class="case-list"><div class="empty">Пока нет рассмотренных дел.</div></div>
+    </section>
+
+    <section class="view" id="reviewView">
+      <div class="section-heading"><div><span class="eyebrow">CASE PROCESSING</span><h2>Новое рассмотрение</h2></div></div>
+      <div class="panel form-panel">
+        <label for="caseText">Текст CASEFILE</label>
+        <textarea id="caseText" placeholder="Вставьте полный текст КФ, включая публикации, даты, доказательства и постановления..."></textarea>
+        <div class="field-row"><span class="muted">Текст сохраняется в этом браузере как черновик.</span><span id="charCount">0 символов</span></div>
+        <label for="videoFiles" class="upload-box"><span class="upload-icon">＋</span><b>Добавить видеодоказательства</b><small>MP4, WebM и другие форматы, поддерживаемые серверным FFmpeg. До 8 файлов.</small><input id="videoFiles" type="file" accept="video/*" multiple></label>
+        <div id="videoList" class="file-list"></div>
+        <button id="analyzeBtn" class="primary wide">Начать рассмотрение</button>
+        <p class="muted tiny">Анализ выполняется подключённой моделью. Видео обрабатывается выборочными кадрами и, если возможно, транскрибацией аудио. Это не гарантирует обнаружение каждого события.</p>
+      </div>
+      <div id="analysisResult" class="panel result-panel hidden"></div>
+    </section>
+
+    <section class="view" id="archiveView">
+      <div class="section-heading"><div><span class="eyebrow">RECORDS</span><h2>Архив дел</h2></div></div>
+      <input id="archiveSearch" class="search" placeholder="Поиск по номеру или тексту дела...">
+      <div id="archiveList" class="case-list"></div>
+    </section>
+
+    <section class="view" id="lawsView">
+      <div class="section-heading"><div><span class="eyebrow">KNOWLEDGE DATABASE</span><h2>Нормативная база</h2></div></div>
+      <div class="panel form-panel">
+        <p class="muted">Добавьте публичную ссылку на нормативный документ. J.A.R.V.I.S. извлечёт доступный текст и сможет учитывать его при анализе дел.</p>
+        <label for="lawTitle">Название документа (необязательно)</label>
+        <input id="lawTitle" class="search" placeholder="Например: Уголовный кодекс">
+        <label for="lawUrl">Ссылка на документ</label>
+        <input id="lawUrl" class="search" type="url" placeholder="https://forum...">
+        <button id="importLawBtn" class="primary wide">Изучить и добавить</button>
+      </div>
+      <div id="lawList" class="case-list"></div>
+    </section>
+
+    <section class="view" id="settingsView">
+      <div class="section-heading"><div><span class="eyebrow">SYSTEM</span><h2>Состояние системы</h2></div></div>
+      <div class="panel settings-card">
+        <div class="setting-line"><span>Интеллектуальное ядро</span><b id="aiState">Проверка...</b></div>
+        <div class="setting-line"><span>Модель</span><b id="modelState">—</b></div>
+        <div class="setting-line"><span>Обработка видео</span><b>FFmpeg на сервере</b></div>
+        <p class="muted tiny">API-ключ хранится только на сервере в .env. Не вставляйте его в это приложение и не отправляйте третьим лицам.</p>
+        <hr>
+        <h3>О программе</h3>
+        <p><b>J.A.R.V.I.S. / FBI CASE ANALYST</b><br>Интеллектуальная система игрового делопроизводства Arizona RolePlay.</p>
+        <p class="muted">Разработчик: Крест Дэтрэйн (Krest Detrain)<br>Версия: 1.0</p>
+      </div>
+    </section>
+  </main>
+
+  <nav class="bottom-nav">
+    <button class="nav-item active" data-go="home"><span>⌂</span>Главная</button>
+    <button class="nav-item" data-go="review"><span>＋</span>Рассмотрение</button>
+    <button class="nav-item" data-go="archive"><span>▤</span>Архив</button>
+    <button class="nav-item" data-go="laws"><span>§</span>Законы</button>
+    <button class="nav-item" data-go="settings"><span>⚙</span>Настройки</button>
+  </nav>
+</div>
+<div id="toast" class="toast"></div>
+<script src="/app.js"></script>
+</body>
+</html>
