@@ -278,60 +278,62 @@ ${l.content}`).join("\n\n---\n\n").slice(0, 90000);
 
   const videoResults = [];
   const cleanups = [];
+  const videoUrls = String(req.body.videoUrls || "").split(/\\r?\\n/).map(x => x.trim()).filter(Boolean).slice(0, 5);
+  const operatorProfile = (() => {
+    try {
+      const p = JSON.parse(req.body.operatorProfile || "{}");
+      return { nick: String(p.nick || "").slice(0, 60), role: String(p.role || "").slice(0, 100) };
+    } catch { return { nick: "", role: "" }; }
+  })();
   try {
     for (const file of (req.files || [])) {
       if (!file.mimetype.startsWith("video/")) continue;
       const result = await processVideo(file.buffer);
       cleanups.push(result.cleanup);
-      videoResults.push({ name: file.originalname, transcript: result.transcript, frames: result.frames });
+      videoResults.push({ name: file.originalname, transcript: "", frames: result.frames });
+    }
+    for (const url of videoUrls) {
+      const downloaded = await downloadVideoUrl(url);
+      cleanups.push(downloaded.cleanup);
+      const result = await processVideo(downloaded.buffer);
+      cleanups.push(result.cleanup);
+      videoResults.push({ name: url, transcript: "", frames: result.frames });
     }
 
     const content = [{
       type: "text",
       text: `
 Ты — J.A.R.V.I.S., аналитическое ядро FBI CASE ANALYST для игрового RP-проекта Arizona RolePlay.
-Отвечай исключительно на русском языке.\nСоставитель: должность «${operatorProfile.role || "Не указана"}», игровой Nick Name «${operatorProfile.nick || "Не указан"}». Если профиль указан, подставляй эти данные в строки «Я, Должность Nick Name» и подпись.\nИТОГОВЫЙ ПРОЕКТ ДОКУМЕНТА ОБЯЗАТЕЛЬНО ВЫДАВАЙ СТРОГО В BBCode по образцам пользователя: [RIGHT], [CENTER], [FONT=times new roman], [COLOR=rgb(...)], [B], логотип [IMG width="200px"]https://i.imgur.com/zSL9jts.png[/IMG], шапка ФБР и подпись справа. Не используй Markdown, HTML или обычное оформление вместо BBCode. Выбери подходящий вид: постановление об ордере, повестка, дисциплинарное постановление, рапорт об аресте либо постановление о закрытии дела. Не выдумывай нормы и факты; неизвестное помечай как «Не установлено».
+Отвечай исключительно на русском языке.
+Составитель: должность «${operatorProfile.role || "Не указана"}», игровой Nick Name «${operatorProfile.nick || "Не указан"}». Если профиль указан, подставляй эти данные в строку «Я, Должность Nick Name» и подпись в конце документа.
+ИТОГОВЫЙ ПРОЕКТ ДОКУМЕНТА ОБЯЗАТЕЛЬНО ВЫДАВАЙ СТРОГО В BBCode по образцам пользователя: [RIGHT], [CENTER], [FONT=times new roman], [COLOR=rgb(...)], [B], логотип [IMG width="200px"]https://i.imgur.com/zSL9jts.png[/IMG], шапка ФБР и подпись справа. Не используй Markdown, HTML или обычное оформление вместо BBCode. Выбери подходящий вид: постановление об ордере, повестка, дисциплинарное постановление, рапорт об аресте либо постановление о закрытии дела. Не выдумывай нормы и факты; неизвестное помечай как «Не установлено».
 Это игровое делопроизводство, не реальная юридическая консультация.
-Работай независимо: не поддерживай автоматически заявителя или сотрудника.
-Не выдумывай факты, статьи, даты, имена, содержание видео или полномочия.
+Работай независимо. Не выдумывай факты, статьи, даты, имена, содержание видео или полномочия.
 Используй только предоставленные нормативные документы. Если их нет или источник не подтверждён, прямо укажи это.
 Отличай отсутствие доказательств от доказанного отсутствия события.
-Все выводы привязывай к цитатам, фрагментам CASEFILE или временным отметкам кадров.
-Учитывай, что видеокадры выборочные и могут не показывать всё происходящее.
+Привязывай выводы к фрагментам CASEFILE и временным отметкам кадров. Видео анализируется по выборочным кадрам, поэтому не утверждай, что просмотрена каждая секунда.
 Не выноси обязательное решение вместо уполномоченного человека: сформируй рекомендацию и объясни её.
-СТРУКТУРА ЗАКЛЮЧЕНИЯ:
-1. Краткая карточка дела.
-2. Хронология.
-3. Установленные обстоятельства.
-4. Анализ каждого доказательства.
-5. Сопоставление текста и видео.
-6. Противоречия и пробелы.
-7. Проверка применимых норм с точными названиями источников.
-8. Рекомендуемое процессуальное решение и обоснование.
-9. Что необходимо запросить дополнительно.
-10. Проект документа в BBCode.
-11. Ограничения анализа.
-Если поле неизвестно, укажи «Не установлено». Не заполняй пробелы догадками.
+Структура анализа: карточка дела; хронология; установленные обстоятельства; анализ доказательств; сопоставление текста и видео; противоречия и пробелы; применимые нормы с точными источниками; рекомендуемое решение; что запросить дополнительно; проект документа в BBCode; ограничения анализа.
 ТЕКСТ CASEFILE:
 ${caseText}
 НОРМАТИВНАЯ БАЗА:
 ${cleanLaws || "Нормативные документы не добавлены."}
 ВИДЕОМАТЕРИАЛЫ:
-${videoResults.map(v => `Файл: ${v.name}
+${videoResults.map(v => `Источник: ${v.name}
 Распознанная речь: Не получена.
-Доступные кадры: ${v.frames.length}.
-Временные отметки: ${v.frames.map(f => f.timestamp).join(", ")}`).join("\n\n") || "Видео не приложено."}
+Проанализировано выборочных кадров: ${v.frames.length}.
+Временные отметки: ${v.frames.map(f => f.timestamp).join(", ")}`).join("\\n\\n") || "Видео не приложено."}
 `
     }];
 
     for (const v of videoResults) {
       for (const frame of v.frames) {
-        content.push({ type: "text", text: `Кадр из файла "${v.name}", отметка ${frame.timestamp}. Это выборочный кадр, не полная запись.` });
+        content.push({ type: "text", text: `Кадр из источника "${v.name}", отметка ${frame.timestamp}. Выборочный кадр, не полная запись.` });
         content.push({ type: "image_url", image_url: { url: frame.dataUrl } });
       }
     }
 
-    for(const url of videoUrls){const dl=await downloadVideoUrl(url);cleanups.push(dl.cleanup);const vr=await processVideo(dl.buffer);cleanups.push(vr.cleanup);videoResults.push({name:url,transcript:"",frames:vr.frames});}\n    const analysis = await askJarvis(content);
+    const analysis = await askJarvis(content);
     const record = {
       id: crypto.randomUUID(),
       number: `FBI-${new Date().getFullYear()}-${crypto.randomBytes(3).toString("hex").toUpperCase()}`,
