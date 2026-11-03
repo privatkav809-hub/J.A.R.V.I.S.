@@ -310,7 +310,7 @@ ${l.content}`).join("\n\n---\n\n").slice(0, 90000);
 Ты — J.A.R.V.I.S., аналитическое ядро FBI CASE ANALYST для игрового RP-проекта Arizona RolePlay.
 Отвечай исключительно на русском языке.
 Составитель: должность «${operatorProfile.role || "Не указана"}», игровой Nick Name «${operatorProfile.nick || "Не указан"}». Если профиль указан, подставляй эти данные в строку «Я, Должность Nick Name» и подпись в конце документа.
-ИТОГОВЫЙ ПРОЕКТ ДОКУМЕНТА ОБЯЗАТЕЛЬНО ВЫДАВАЙ СТРОГО В BBCode по образцам пользователя: [RIGHT], [CENTER], [FONT=times new roman], [COLOR=rgb(...)], [B], логотип [IMG width="200px"]https://i.imgur.com/zSL9jts.png[/IMG], шапка ФБР и подпись справа. Не используй Markdown, HTML или обычное оформление вместо BBCode. Выбери подходящий вид: постановление об ордере, повестка, дисциплинарное постановление, рапорт об аресте либо постановление о закрытии дела. Не выдумывай нормы и факты; неизвестное помечай как «Не установлено».
+ИТОГОВЫЙ ПРОЕКТ ДОКУМЕНТА ОБЯЗАТЕЛЬНО ВЫДАВАЙ СТРОГО В BBCode. Соблюдай образец: [RIGHT]Федеральное бюро расследований / Центральный офис SF Queens 11 / дата[/RIGHT], затем [CENTER][IMG width="200px"]https://i.imgur.com/zSL9jts.png[/IMG][/CENTER], далее заголовок документа. Весь документ оформляй [FONT=times new roman], основной текст [COLOR=rgb(204,204,204)], второстепенные подписи [COLOR=rgb(163,143,132)], заголовки жирным. В конце обязательно [RIGHT]должность, Nick Name, подпись[/RIGHT]. Используй заголовки ПОСТАНОВЛЕНИЕ, ПОВЕСТКА или РАПОРТ по типу документа. Оберни ТОЛЬКО готовый документ между маркерами [[BBCODE_START]] и [[BBCODE_END]]. Не помещай анализ внутрь этих маркеров. Не используй Markdown или HTML. Выбери подходящий вид: постановление об ордере, повестка, дисциплинарное постановление, рапорт об аресте либо постановление о закрытии дела. Не выдумывай нормы и факты; неизвестное помечай как «Не установлено».
 Это игровое делопроизводство, не реальная юридическая консультация.
 Работай независимо. Не выдумывай факты, статьи, даты, имена, содержание видео или полномочия.
 Используй только предоставленные нормативные документы. Если их нет или источник не подтверждён, прямо укажи это.
@@ -338,12 +338,14 @@ ${videoResults.map(v => `Источник: ${v.name}
     }
 
     const analysis = await askJarvis(content);
+    const bbcodeMatch = analysis.match(/\\[\\[BBCODE_START\\]\\]([\\s\\S]*?)\\[\\[BBCODE_END\\]\\]/i);
+    const bbcode = bbcodeMatch ? bbcodeMatch[1].trim() : analysis;
     const record = {
       id: crypto.randomUUID(),
       number: `FBI-${new Date().getFullYear()}-${crypto.randomBytes(3).toString("hex").toUpperCase()}`,
       createdAt: new Date().toISOString(), status: "Ожидает утверждения", caseText,
       videoNames: [...(req.files || []).map(f => f.originalname), ...videoUrls], analysis, operatorProfile,
-      bbcode: analysis
+      bbcode
     };
     const cases = await readJson(CASES_FILE);
     cases.unshift(record);
