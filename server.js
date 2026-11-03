@@ -157,14 +157,17 @@ async function run(command, args) {
 
 async function downloadVideoUrl(rawUrl) {
   const parsed = new URL(rawUrl);
-  if (!["http:","https:"].includes(parsed.protocol)) throw new Error("Разрешены только HTTP/HTTPS ссылки.");
-  const host=parsed.hostname.toLowerCase();
-  if (["localhost","127.0.0.1","::1"].includes(host)||host.endsWith(".local")) throw new Error("Локальные адреса запрещены.");
-  const dir=await fs.mkdtemp(path.join(os.tmpdir(),"jarvis-url-"));
-  const output=path.join(dir,"source.%(ext)s");
+  if (!["http:", "https:"].includes(parsed.protocol)) throw new Error("Разрешены только HTTP/HTTPS ссылки.");
+  const host = parsed.hostname.toLowerCase();
+  if (["localhost", "127.0.0.1", "::1"].includes(host) || host.endsWith(".local")) throw new Error("Локальные адреса запрещены.");
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "jarvis-url-"));
+  const output = path.join(dir, "source.%(ext)s");
   try {
-    await new Promise((resolve,reject)=>{
-      const bin=await fs.access(path.join(os.homedir(),".local","bin","yt-dlp")).then(()=>path.join(os.homedir(),".local","bin","yt-dlp")).catch(()=>"yt-dlp");\n      const p=spawn(bin,["--no-playlist","--max-filesize","150M","-f","best[height<=720]/best","-o",output,rawUrl]);
+    const bin = await fs.access(path.join(os.homedir(), ".local", "bin", "yt-dlp"))
+      .then(() => path.join(os.homedir(), ".local", "bin", "yt-dlp"))
+      .catch(() => "yt-dlp");
+    await new Promise((resolve, reject) => {
+      const p = spawn(bin, ["--no-playlist", "--max-filesize", "150M", "-f", "best[height<=720]/best", "-o", output, rawUrl]);
       let err=""; p.stderr.on("data",d=>err+=d.toString()); p.on("error",reject);
       p.on("close",code=>code===0?resolve():reject(new Error(err.slice(-1200)||"yt-dlp не смог получить видео.")));
       const timer=setTimeout(()=>{p.kill("SIGKILL");reject(new Error("Превышено время получения видео."));},90000); timer.unref();
