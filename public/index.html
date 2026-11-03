@@ -15,7 +15,7 @@
     <div class="brand-mark">J<span>.</span></div>
     <div class="brand-copy"><b>J.A.R.V.I.S.</b><small>FBI CASE ANALYST</small></div>
     <div class="status"><i id="statusDot"></i><span id="statusText">Проверка ИИ</span></div>
-    <div class="operator-chip"><div class="operator-avatar">KD</div><div class="operator-copy"><b>KREST DETRAIN</b><small>ОПЕРАТОР СИСТЕМЫ</small></div></div>
+    <div class="operator-chip" id="operatorChip"><div class="operator-avatar" id="operatorAvatar">—</div><div class="operator-copy"><b id="operatorName">ГОСТЬ</b><small id="operatorRole">ПРОФИЛЬ НЕ ЗАПОЛНЕН</small></div></div>
   </header>
   <main>
     <section class="welcome panel">
@@ -41,7 +41,7 @@
         <textarea id="caseText" placeholder="Вставьте полный текст КФ, включая публикации, даты, доказательства и постановления..."></textarea>
         <div class="field-row"><span class="muted">Текст сохраняется в этом браузере как черновик.</span><span id="charCount">0 символов</span></div>
         <label for="videoFiles" class="upload-box"><span class="upload-icon">＋</span><b>Добавить видеодоказательства</b><small>MP4, WebM и другие форматы, поддерживаемые серверным FFmpeg. До 8 файлов.</small><input id="videoFiles" type="file" accept="video/*" multiple></label>
-        <div id="videoList" class="file-list"></div>
+        <div id="videoList" class="file-list"></div><label for="videoUrls">Ссылки на видеодоказательства</label><textarea id="videoUrls" style="min-height:90px" placeholder="YouTube, RuTube или прямая ссылка на MP4. Каждую ссылку — с новой строки."></textarea><p class="muted tiny">Сервер получает видео и анализирует выборочные кадры. Доступ зависит от ограничений площадки.</p>
         <button id="analyzeBtn" class="primary wide">Начать рассмотрение</button>
         <p class="muted tiny">Видео анализируется по выборочным кадрам. Это не гарантирует обнаружение каждого события.</p>
       </div>
@@ -75,7 +75,7 @@
     </section>
     <section class="view" id="settingsView">
       <div class="section-heading"><div><span class="eyebrow">SYSTEM / 05</span><h2>Состояние системы</h2></div></div>
-      <div class="panel settings-card">
+      <div class="panel settings-card"><h3>Профиль сотрудника <span class="muted">(необязательно)</span></h3><p class="muted tiny">Никнейм и должность будут автоматически добавляться в проекты документов. Пароль не нужен; профиль хранится в этом браузере.</p><label for="profileNick">Игровой Nick Name</label><input id="profileNick" class="search" maxlength="60" placeholder="Например: Krest Detrain"><label for="profileRole">Должность</label><input id="profileRole" class="search" maxlength="100" placeholder="Например: Заместитель директора ФБР"><div class="welcome-actions"><button class="primary" id="saveProfileBtn">Сохранить профиль</button><button class="secondary" id="clearProfileBtn">Пропустить / очистить</button></div><hr>
         <div class="setting-line"><span>Интеллектуальное ядро</span><b id="aiState">Проверка...</b></div>
         <div class="setting-line"><span>Модель</span><b id="modelState">—</b></div>
         <div class="setting-line"><span>Обработка видео</span><b>FFmpeg на сервере</b></div>
