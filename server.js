@@ -346,10 +346,15 @@ ${videoResults.map(v => `Источник: ${v.name}
     const bbcodeMatch = analysis.match(/\[\[BBCODE_START\]\]([\s\S]*?)\[\[BBCODE_END\]\]/i);
     let bbcode = bbcodeMatch ? bbcodeMatch[1].trim() : "";
     if (!bbcode) {
-      const draft = await askJarvis([{
-        type: "text",
-        text: `Составь только готовый форумный документ Arizona RolePlay на основе анализа ниже. Верни только BBCode между [[BBCODE_START]] и [[BBCODE_END]], без пояснений. Обязательно: [FONT=times new roman], шапка справа с Федеральным Бюро Расследований, Центральный офис г. Сан-Фиерро, Квинс 11 и датой; логотип по центру [IMG width="200px"]https://i.imgur.com/zSL9jts.png[/IMG]; серый текст rgb(204,204,204), заголовки rgb(163,143,132); заключительная подпись справа. Ник сотрудника: ${operatorProfile.nick}. Должность: ${operatorProfile.role}. Не оставляй placeholders для этих двух полей. Не добавляй факты и статьи, которых нет в анализе. Если факт неизвестен, укажи «Не установлено». Используй соответствующий вид документа: постановление, повестка или рапорт.\n\nАНАЛИЗ:\n${analysis}`
-      }]);
+      let draft = "";
+      try {
+        draft = await askJarvis([{
+          type: "text",
+          text: `Составь только готовый форумный документ Arizona RolePlay на основе анализа ниже. Верни только BBCode между [[BBCODE_START]] и [[BBCODE_END]], без пояснений. Обязательно: [FONT=times new roman], шапка справа с Федеральным Бюро Расследований, Центральный офис г. Сан-Фиерро, Квинс 11 и датой; логотип по центру [IMG width="200px"]https://i.imgur.com/zSL9jts.png[/IMG]; серый текст rgb(204,204,204), заголовки rgb(163,143,132); заключительная подпись справа. Ник сотрудника: ${operatorProfile.nick}. Должность: ${operatorProfile.role}. Не оставляй placeholders для этих двух полей. Не добавляй факты и статьи, которых нет в анализе. Если факт неизвестен, укажи «Не установлено». Используй соответствующий вид документа: постановление, повестка или рапорт.\n\nАНАЛИЗ:\n${analysis}`
+        }]);
+      } catch (draftError) {
+        console.error("Отдельная генерация BBCode не удалась:", draftError.message);
+      }
       const draftMatch = draft.match(/\[\[BBCODE_START\]\]([\s\S]*?)\[\[BBCODE_END\]\]/i);
       if (draftMatch) bbcode = draftMatch[1].trim();
       else {
